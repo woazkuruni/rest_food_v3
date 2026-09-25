@@ -1,3 +1,50 @@
 <?php
-require_once __DIR__.'/../config/constants.php';require_admin();$categories=db()->query("SELECT id,title FROM tbl_category WHERE active='Yes' ORDER BY title")->fetchAll();if(is_post()){verify_csrf();$title=trim((string)($_POST['title']??''));$desc=trim((string)($_POST['description']??''));$price=filter_input(INPUT_POST,'price',FILTER_VALIDATE_FLOAT);$stock=filter_input(INPUT_POST,'stock_qty',FILTER_VALIDATE_INT);$category=filter_input(INPUT_POST,'category_id',FILTER_VALIDATE_INT);$featured=($_POST['featured']??'No')==='Yes'?'Yes':'No';$active=($_POST['active']??'Yes')==='Yes'?'Yes':'No';if(mb_strlen($title)<2||$price===false||$price<=0||$stock===false||$stock<0||!$category){flash('error','Please enter valid food details.');}else{try{$image=upload_image($_FILES['image']??[],'foods',null);db()->prepare('INSERT INTO tbl_food(title,description,price,image_name,category_id,stock_qty,featured,active,created_at) VALUES(?,?,?,?,?,?,?,?,NOW())')->execute([$title,$desc,$price,$image,$category,$stock,$featured,$active]);flash('success','Food added.');redirect('admin/manage-food.php');}catch(Throwable $e){flash('error',$e->getMessage());}}}$pageTitle='Add Food';include __DIR__.'/partial/menu.php';?>
-<div class="admin-title"><h1>Add Food</h1></div><div class="panel admin-form"><form method="post" enctype="multipart/form-data"><?= csrf_field() ?><div class="field"><label>Title</label><input class="input" name="title" value="<?= e($_POST['title']??'') ?>" required></div><br><div class="field"><label>Description</label><textarea name="description" rows="4"><?= e($_POST['description']??'') ?></textarea></div><br><div class="form-grid"><div class="field"><label>Price (Tk)</label><input class="input" type="number" step="0.01" min="1" name="price" required></div><div class="field"><label>Stock quantity</label><input class="input" type="number" min="0" name="stock_qty" value="20" required></div><div class="field"><label>Category</label><select name="category_id"><?php foreach($categories as $c):?><option value="<?= (int)$c['id'] ?>"><?= e($c['title']) ?></option><?php endforeach;?></select></div><div class="field"><label>Featured</label><select name="featured"><option>No</option><option>Yes</option></select></div><div class="field"><label>Active</label><select name="active"><option>Yes</option><option>No</option></select></div></div><br><div class="field"><label>Image</label><input class="input" type="file" name="image" accept="image/jpeg,image/png,image/webp"></div><br><button class="btn btn-primary">Add food</button></form></div><?php include __DIR__.'/partial/footer.php';?>
+require_once __DIR__ . '/../config/constants.php';
+require_admin();
+$categories = db()->query("SELECT id,title FROM tbl_category WHERE active='Yes' ORDER BY title")->fetchAll();
+if (is_post()) {
+    verify_csrf();
+    $title = trim((string)($_POST['title'] ?? ''));
+    $desc = trim((string)($_POST['description'] ?? ''));
+    $price = filter_input(INPUT_POST, 'price', FILTER_VALIDATE_FLOAT);
+    $stock = filter_input(INPUT_POST, 'stock_qty', FILTER_VALIDATE_INT);
+    $category = filter_input(INPUT_POST, 'category_id', FILTER_VALIDATE_INT);
+    $featured = ($_POST['featured'] ?? 'No') === 'Yes' ? 'Yes' : 'No';
+    $active = ($_POST['active'] ?? 'Yes') === 'Yes' ? 'Yes' : 'No';
+    if (mb_strlen($title) < 2 || $price === false || $price <= 0 || $stock === false || $stock < 0 || !$category) {
+        flash('error', 'Please enter valid food details.');
+    } else {
+        try {
+            $image = upload_image($_FILES['image'] ?? [], 'foods', null);
+            db()->prepare('INSERT INTO tbl_food(title,description,price,image_name,category_id,stock_qty,featured,active,created_at) VALUES(?,?,?,?,?,?,?,?,NOW())')->execute([$title, $desc, $price, $image, $category, $stock, $featured, $active]);
+            flash('success', 'Food added.');
+            redirect('admin/manage-food.php');
+        } catch (Throwable $e) {
+            flash('error', $e->getMessage());
+        }
+    }
+}
+$pageTitle = 'Add Food';
+include __DIR__ . '/partial/menu.php'; ?>
+<div class="admin-title">
+    <h1>Add Food</h1>
+</div>
+<div class="panel admin-form">
+    <form method="post" enctype="multipart/form-data"><?= csrf_field() ?><div class="field"><label>Title</label><input class="input" name="title" value="<?= e($_POST['title'] ?? '') ?>" required></div><br>
+        <div class="field"><label>Description</label><textarea name="description" rows="4"><?= e($_POST['description'] ?? '') ?></textarea></div><br>
+        <div class="form-grid">
+            <div class="field"><label>Price (Tk)</label><input class="input" type="number" step="0.01" min="1" name="price" required></div>
+            <div class="field"><label>Stock quantity</label><input class="input" type="number" min="0" name="stock_qty" value="20" required></div>
+            <div class="field"><label>Category</label><select name="category_id"><?php foreach ($categories as $c): ?><option value="<?= (int)$c['id'] ?>"><?= e($c['title']) ?></option><?php endforeach; ?></select></div>
+            <div class="field"><label>Featured</label><select name="featured">
+                    <option>No</option>
+                    <option>Yes</option>
+                </select></div>
+            <div class="field"><label>Active</label><select name="active">
+                    <option>Yes</option>
+                    <option>No</option>
+                </select></div>
+        </div><br>
+        <div class="field"><label>Image</label><input class="input" type="file" name="image" accept="image/jpeg,image/png,image/webp"></div><br><button class="btn btn-primary">Add food</button>
+    </form>
+</div><?php include __DIR__ . '/partial/footer.php'; ?>

@@ -1,3 +1,28 @@
 <?php
-require_once __DIR__.'/config/constants.php';$u=require_login();$s=db()->prepare('SELECT * FROM tbl_order WHERE user_id=? ORDER BY id DESC');$s->execute([$u['id']]);$orders=$s->fetchAll();$pageTitle='My Orders — '.APP_NAME;include __DIR__.'/partials-font/menu.php';?>
-<section class="page-hero"><div class="container"><h1>My Orders</h1><p>Track delivery, payment verification and past orders.</p></div></section><section class="section"><div class="container"><?php if(!$orders):?><div class="panel empty"><h2>No orders yet</h2><p>Your first meal is waiting.</p><a class="btn btn-primary" href="<?= e(url('foods.php')) ?>">Browse menu</a></div><?php endif;?><?php foreach($orders as $o):?><div class="order-card"><div class="order-head"><div><strong style="font-size:1.12rem">Order #<?= 1000+(int)$o['id'] ?></strong><div class="muted"><?= e(date('M d, Y • h:i A',strtotime($o['order_date']))) ?></div></div><div><span class="status <?= e(status_class($o['status'])) ?>"><?= e($o['status']) ?></span> <span class="status <?= e(status_class($o['payment_status'])) ?>"><?= e(payment_label($o['payment_method']).' • '.$o['payment_status']) ?></span></div></div><?php if($o['status']!=='Cancelled'): $p=order_progress($o['status']);?><div class="progress-track"><?php foreach(['Ordered','Preparing','On Delivery','Delivered'] as $idx=>$label):?><div class="progress-step <?= $p>=$idx+1?'done':'' ?>"><?= e($label) ?></div><?php endforeach;?></div><?php endif;?><div class="summary-row total"><span><?= $o['coupon_code']?'Coupon '.$o['coupon_code'].' applied':'Order total' ?></span><span><?= e(money($o['total'])) ?></span></div><div class="hero-actions"><a class="btn btn-light btn-sm" href="<?= e(url('order-details.php?id='.$o['id'])) ?>">View details</a><a class="btn btn-light btn-sm" href="<?= e(url('invoice.php?id='.$o['id'])) ?>">Invoice</a><?php if(can_cancel_order($o)):?><form method="post" action="<?= e(url('cancel-order.php')) ?>"><?= csrf_field() ?><input type="hidden" name="order_id" value="<?= (int)$o['id'] ?>"><input type="hidden" name="reason" value="Cancelled by customer"><button class="btn btn-danger btn-sm" data-confirm="Cancel this order? Stock and coupon usage will be restored.">Cancel order</button></form><?php endif;?></div></div><?php endforeach;?></div></section><?php include __DIR__.'/partials-font/footer.php';?>
+require_once __DIR__ . '/config/constants.php';
+$u = require_login();
+$s = db()->prepare('SELECT * FROM tbl_order WHERE user_id=? ORDER BY id DESC');
+$s->execute([$u['id']]);
+$orders = $s->fetchAll();
+$pageTitle = 'My Orders — ' . APP_NAME;
+include __DIR__ . '/partials-font/menu.php'; ?>
+<section class="page-hero">
+    <div class="container">
+        <h1>My Orders</h1>
+        <p>Track delivery, payment verification and past orders.</p>
+    </div>
+</section>
+<section class="section">
+    <div class="container"><?php if (!$orders): ?><div class="panel empty">
+                <h2>No orders yet</h2>
+                <p>Your first meal is waiting.</p><a class="btn btn-primary" href="<?= e(url('foods.php')) ?>">Browse menu</a>
+            </div><?php endif; ?><?php foreach ($orders as $o): ?><div class="order-card">
+                <div class="order-head">
+                    <div><strong style="font-size:1.12rem">Order #<?= 1000 + (int)$o['id'] ?></strong>
+                        <div class="muted"><?= e(date('M d, Y • h:i A', strtotime($o['order_date']))) ?></div>
+                    </div>
+                    <div><span class="status <?= e(status_class($o['status'])) ?>"><?= e($o['status']) ?></span> <span class="status <?= e(status_class($o['payment_status'])) ?>"><?= e(payment_label($o['payment_method']) . ' • ' . $o['payment_status']) ?></span></div>
+                </div><?php if ($o['status'] !== 'Cancelled'): $p = order_progress($o['status']); ?><div class="progress-track"><?php foreach (['Ordered', 'Preparing', 'On Delivery', 'Delivered'] as $idx => $label): ?><div class="progress-step <?= $p >= $idx + 1 ? 'done' : '' ?>"><?= e($label) ?></div><?php endforeach; ?></div><?php endif; ?><div class="summary-row total"><span><?= $o['coupon_code'] ? 'Coupon ' . $o['coupon_code'] . ' applied' : 'Order total' ?></span><span><?= e(money($o['total'])) ?></span></div>
+                <div class="hero-actions"><a class="btn btn-light btn-sm" href="<?= e(url('order-details.php?id=' . $o['id'])) ?>">View details</a><a class="btn btn-light btn-sm" href="<?= e(url('invoice.php?id=' . $o['id'])) ?>">Invoice</a><?php if (can_cancel_order($o)): ?><form method="post" action="<?= e(url('cancel-order.php')) ?>"><?= csrf_field() ?><input type="hidden" name="order_id" value="<?= (int)$o['id'] ?>"><input type="hidden" name="reason" value="Cancelled by customer"><button class="btn btn-danger btn-sm" data-confirm="Cancel this order? Stock and coupon usage will be restored.">Cancel order</button></form><?php endif; ?></div>
+            </div><?php endforeach; ?></div>
+</section><?php include __DIR__ . '/partials-font/footer.php'; ?>

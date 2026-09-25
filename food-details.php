@@ -1,7 +1,103 @@
 <?php
-require_once __DIR__.'/config/constants.php';$id=filter_input(INPUT_GET,'id',FILTER_VALIDATE_INT);if(!$id){redirect('foods.php');}$stmt=db()->prepare("SELECT f.*,c.title category_title,COALESCE(AVG(r.rating),0) rating,COUNT(r.id) review_count FROM tbl_food f JOIN tbl_category c ON c.id=f.category_id LEFT JOIN tbl_review r ON r.food_id=f.id AND r.status='Published' WHERE f.id=? AND f.active='Yes' GROUP BY f.id");$stmt->execute([$id]);$food=$stmt->fetch();if(!$food){flash('error','Food not found or unavailable.');redirect('foods.php');}
-$user=auth_user();$canReview=false;$myReview=null;if($user){$s=db()->prepare("SELECT COUNT(*) FROM tbl_order o JOIN tbl_order_item oi ON oi.order_id=o.id WHERE o.user_id=? AND oi.food_id=? AND o.status='Delivered'");$s->execute([$user['id'],$id]);$canReview=(int)$s->fetchColumn()>0;$s=db()->prepare('SELECT * FROM tbl_review WHERE user_id=? AND food_id=?');$s->execute([$user['id'],$id]);$myReview=$s->fetch()?:null;}
-if(is_post()&&($_POST['action']??'')==='review'){$user=require_login();verify_csrf();if(!$canReview){flash('error','Reviews are available after a delivered purchase.');redirect('food-details.php?id='.$id);} $rating=(int)($_POST['rating']??0);$text=trim((string)($_POST['review_text']??''));if($rating<1||$rating>5){flash('error','Choose a rating from 1 to 5.');}elseif(mb_strlen($text)>1000){flash('error','Review must be under 1000 characters.');}else{$s=db()->prepare("INSERT INTO tbl_review(user_id,food_id,rating,review_text,status,created_at) VALUES(?,?,?,?, 'Published',NOW()) ON DUPLICATE KEY UPDATE rating=VALUES(rating),review_text=VALUES(review_text),status='Published',updated_at=NOW()");$s->execute([$user['id'],$id,$rating,$text]);flash('success','Your review has been saved.');redirect('food-details.php?id='.$id);}}
-$s=db()->prepare("SELECT r.*,u.full_name,u.image_name FROM tbl_review r JOIN tbl_user u ON u.id=r.user_id WHERE r.food_id=? AND r.status='Published' ORDER BY r.id DESC");$s->execute([$id]);$reviews=$s->fetchAll();$pageTitle=$food['title'].' — '.APP_NAME;include __DIR__.'/partials-font/menu.php';?>
-<section class="section"><div class="container"><div class="food-detail"><div><img class="food-detail-img" src="<?= e(food_image($food['image_name'])) ?>" alt="<?= e($food['title']) ?>"></div><div><span class="eyebrow"><?= e($food['category_title']) ?></span><h1><?= e($food['title']) ?></h1><div class="rating"><?= e(rating_stars((float)$food['rating'])) ?> <?= number_format((float)$food['rating'],1) ?> • <?= (int)$food['review_count'] ?> review(s)</div><p class="muted"><?= nl2br(e($food['description'])) ?></p><div class="price" style="font-size:1.6rem"><?= e(money($food['price'])) ?></div><p><span class="status <?= (int)$food['stock_qty']>0?'status-success':'status-danger' ?>"><?= (int)$food['stock_qty']>0?(int)$food['stock_qty'].' available':'Sold out' ?></span></p><div class="food-actions" style="max-width:460px"><form action="<?= e(url('add-cart.php')) ?>" method="post"><?= csrf_field() ?><input type="hidden" name="food_id" value="<?= (int)$food['id'] ?>"><div class="qty-form"><input class="input" type="number" name="quantity" min="1" max="<?= max(1,(int)$food['stock_qty']) ?>" value="1"><button class="btn btn-primary" <?= (int)$food['stock_qty']<1?'disabled':'' ?>>Add to cart</button></div></form><?php if($user):?><form action="<?= e(url('toggle-wishlist.php')) ?>" method="post"><?= csrf_field() ?><input type="hidden" name="food_id" value="<?= (int)$food['id'] ?>"><button class="btn btn-light"><?= is_wishlisted($id)?'♥ Saved':'♡ Wishlist' ?></button></form><?php endif;?></div><hr class="sep"><p class="notice">Free delivery when food subtotal reaches Tk 1,000. Prices and stock are verified again at checkout.</p></div></div></div></section>
-<section class="section alt"><div class="container"><div class="section-head"><div><h2>Customer reviews</h2><p>Reviews are limited to customers with a delivered purchase.</p></div></div><div class="grid grid-2"><div><?php if(!$reviews):?><div class="panel empty">No reviews yet.</div><?php endif;?><?php foreach($reviews as $r):?><div class="review-card" style="margin-bottom:14px"><div class="review-head"><div><strong><?= e($r['full_name']) ?></strong><div class="review-stars"><?= e(rating_stars((float)$r['rating'])) ?></div></div><span class="muted"><?= e(date('M d, Y',strtotime($r['created_at']))) ?></span></div><p><?= e($r['review_text']?:'Rated this food.') ?></p></div><?php endforeach;?></div><div><?php if($user&&$canReview):?><div class="panel"><h3><?= $myReview?'Update your review':'Write a review' ?></h3><form method="post"><?= csrf_field() ?><input type="hidden" name="action" value="review"><div class="field"><label>Rating</label><select name="rating" required><?php for($i=5;$i>=1;$i--):?><option value="<?= $i ?>" <?= (int)($myReview['rating']??5)===$i?'selected':'' ?>><?= $i ?> / 5</option><?php endfor;?></select></div><br><div class="field"><label>Review</label><textarea name="review_text" rows="5" maxlength="1000"><?= e($myReview['review_text']??'') ?></textarea></div><br><button class="btn btn-primary">Save review</button></form></div><?php elseif($user):?><div class="panel"><h3>Verified purchase reviews</h3><p class="muted">After this food is delivered in one of your orders, you can rate and review it here.</p></div><?php else:?><div class="panel"><h3>Want to review?</h3><p class="muted">Log in, order this item, and review it after delivery.</p><a class="btn btn-light" href="<?= e(url('login.php')) ?>">Login</a></div><?php endif;?></div></div></div></section><?php include __DIR__.'/partials-font/footer.php';?>
+require_once __DIR__ . '/config/constants.php';
+$id = filter_input(INPUT_GET, 'id', FILTER_VALIDATE_INT);
+if (!$id) {
+    redirect('foods.php');
+}
+$stmt = db()->prepare("SELECT f.*,c.title category_title,COALESCE(AVG(r.rating),0) rating,COUNT(r.id) review_count FROM tbl_food f JOIN tbl_category c ON c.id=f.category_id LEFT JOIN tbl_review r ON r.food_id=f.id AND r.status='Published' WHERE f.id=? AND f.active='Yes' GROUP BY f.id");
+$stmt->execute([$id]);
+$food = $stmt->fetch();
+if (!$food) {
+    flash('error', 'Food not found or unavailable.');
+    redirect('foods.php');
+}
+$user = auth_user();
+$canReview = false;
+$myReview = null;
+if ($user) {
+    $s = db()->prepare("SELECT COUNT(*) FROM tbl_order o JOIN tbl_order_item oi ON oi.order_id=o.id WHERE o.user_id=? AND oi.food_id=? AND o.status='Delivered'");
+    $s->execute([$user['id'], $id]);
+    $canReview = (int)$s->fetchColumn() > 0;
+    $s = db()->prepare('SELECT * FROM tbl_review WHERE user_id=? AND food_id=?');
+    $s->execute([$user['id'], $id]);
+    $myReview = $s->fetch() ?: null;
+}
+if (is_post() && ($_POST['action'] ?? '') === 'review') {
+    $user = require_login();
+    verify_csrf();
+    if (!$canReview) {
+        flash('error', 'Reviews are available after a delivered purchase.');
+        redirect('food-details.php?id=' . $id);
+    }
+    $rating = (int)($_POST['rating'] ?? 0);
+    $text = trim((string)($_POST['review_text'] ?? ''));
+    if ($rating < 1 || $rating > 5) {
+        flash('error', 'Choose a rating from 1 to 5.');
+    } elseif (mb_strlen($text) > 1000) {
+        flash('error', 'Review must be under 1000 characters.');
+    } else {
+        $s = db()->prepare("INSERT INTO tbl_review(user_id,food_id,rating,review_text,status,created_at) VALUES(?,?,?,?, 'Published',NOW()) ON DUPLICATE KEY UPDATE rating=VALUES(rating),review_text=VALUES(review_text),status='Published',updated_at=NOW()");
+        $s->execute([$user['id'], $id, $rating, $text]);
+        flash('success', 'Your review has been saved.');
+        redirect('food-details.php?id=' . $id);
+    }
+}
+$s = db()->prepare("SELECT r.*,u.full_name,u.image_name FROM tbl_review r JOIN tbl_user u ON u.id=r.user_id WHERE r.food_id=? AND r.status='Published' ORDER BY r.id DESC");
+$s->execute([$id]);
+$reviews = $s->fetchAll();
+$pageTitle = $food['title'] . ' — ' . APP_NAME;
+include __DIR__ . '/partials-font/menu.php'; ?>
+<section class="section">
+    <div class="container">
+        <div class="food-detail">
+            <div><img class="food-detail-img" src="<?= e(food_image($food['image_name'])) ?>" alt="<?= e($food['title']) ?>"></div>
+            <div><span class="eyebrow"><?= e($food['category_title']) ?></span>
+                <h1><?= e($food['title']) ?></h1>
+                <div class="rating"><?= e(rating_stars((float)$food['rating'])) ?> <?= number_format((float)$food['rating'], 1) ?> • <?= (int)$food['review_count'] ?> review(s)</div>
+                <p class="muted"><?= nl2br(e($food['description'])) ?></p>
+                <div class="price" style="font-size:1.6rem"><?= e(money($food['price'])) ?></div>
+                <p><span class="status <?= (int)$food['stock_qty'] > 0 ? 'status-success' : 'status-danger' ?>"><?= (int)$food['stock_qty'] > 0 ? (int)$food['stock_qty'] . ' available' : 'Sold out' ?></span></p>
+                <div class="food-actions" style="max-width:460px">
+                    <form action="<?= e(url('add-cart.php')) ?>" method="post"><?= csrf_field() ?><input type="hidden" name="food_id" value="<?= (int)$food['id'] ?>">
+                        <div class="qty-form"><input class="input" type="number" name="quantity" min="1" max="<?= max(1, (int)$food['stock_qty']) ?>" value="1"><button class="btn btn-primary" <?= (int)$food['stock_qty'] < 1 ? 'disabled' : '' ?>>Add to cart</button></div>
+                    </form><?php if ($user): ?><form action="<?= e(url('toggle-wishlist.php')) ?>" method="post"><?= csrf_field() ?><input type="hidden" name="food_id" value="<?= (int)$food['id'] ?>"><button class="btn btn-light"><?= is_wishlisted($id) ? '♥ Saved' : '♡ Wishlist' ?></button></form><?php endif; ?>
+                </div>
+                <hr class="sep">
+                <p class="notice">Free delivery when food subtotal reaches Tk 1,000. Prices and stock are verified again at checkout.</p>
+            </div>
+        </div>
+    </div>
+</section>
+<section class="section alt">
+    <div class="container">
+        <div class="section-head">
+            <div>
+                <h2>Customer reviews</h2>
+                <p>Reviews are limited to customers with a delivered purchase.</p>
+            </div>
+        </div>
+        <div class="grid grid-2">
+            <div><?php if (!$reviews): ?><div class="panel empty">No reviews yet.</div><?php endif; ?><?php foreach ($reviews as $r): ?><div class="review-card" style="margin-bottom:14px">
+                        <div class="review-head">
+                            <div><strong><?= e($r['full_name']) ?></strong>
+                                <div class="review-stars"><?= e(rating_stars((float)$r['rating'])) ?></div>
+                            </div><span class="muted"><?= e(date('M d, Y', strtotime($r['created_at']))) ?></span>
+                        </div>
+                        <p><?= e($r['review_text'] ?: 'Rated this food.') ?></p>
+                    </div><?php endforeach; ?></div>
+            <div><?php if ($user && $canReview): ?><div class="panel">
+                        <h3><?= $myReview ? 'Update your review' : 'Write a review' ?></h3>
+                        <form method="post"><?= csrf_field() ?><input type="hidden" name="action" value="review">
+                            <div class="field"><label>Rating</label><select name="rating" required><?php for ($i = 5; $i >= 1; $i--): ?><option value="<?= $i ?>" <?= (int)($myReview['rating'] ?? 5) === $i ? 'selected' : '' ?>><?= $i ?> / 5</option><?php endfor; ?></select></div><br>
+                            <div class="field"><label>Review</label><textarea name="review_text" rows="5" maxlength="1000"><?= e($myReview['review_text'] ?? '') ?></textarea></div><br><button class="btn btn-primary">Save review</button>
+                        </form>
+                    </div><?php elseif ($user): ?><div class="panel">
+                        <h3>Verified purchase reviews</h3>
+                        <p class="muted">After this food is delivered in one of your orders, you can rate and review it here.</p>
+                    </div><?php else: ?><div class="panel">
+                        <h3>Want to review?</h3>
+                        <p class="muted">Log in, order this item, and review it after delivery.</p><a class="btn btn-light" href="<?= e(url('login.php')) ?>">Login</a>
+                    </div><?php endif; ?></div>
+        </div>
+    </div>
+</section><?php include __DIR__ . '/partials-font/footer.php'; ?>

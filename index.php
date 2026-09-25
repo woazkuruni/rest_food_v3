@@ -1,15 +1,111 @@
 <?php
-require_once __DIR__.'/config/constants.php';
-$pageTitle=APP_NAME.' — Fresh Food Delivered';
-$categories=db()->query("SELECT * FROM tbl_category WHERE active='Yes' AND featured='Yes' ORDER BY id DESC LIMIT 4")->fetchAll();
-$foods=db()->query("SELECT f.*,COALESCE(AVG(r.rating),0) rating,COUNT(r.id) review_count FROM tbl_food f LEFT JOIN tbl_review r ON r.food_id=f.id AND r.status='Published' WHERE f.active='Yes' AND f.featured='Yes' GROUP BY f.id ORDER BY rating DESC,f.id DESC LIMIT 8")->fetchAll();
-$coupon=db()->query("SELECT * FROM tbl_coupon WHERE active='Yes' AND starts_at<=NOW() AND ends_at>=NOW() ORDER BY id LIMIT 1")->fetch();
-$stats=['foods'=>(int)db()->query("SELECT COUNT(*) FROM tbl_food WHERE active='Yes'")->fetchColumn(),'customers'=>(int)db()->query("SELECT COUNT(*) FROM tbl_user WHERE account_status='Active'")->fetchColumn(),'orders'=>(int)db()->query("SELECT COUNT(*) FROM tbl_order WHERE status='Delivered'")->fetchColumn()];
-include __DIR__.'/partials-font/menu.php';?>
-<section class="hero"><div class="container hero-grid"><div><span class="eyebrow">Fresh • Fast • Secure</span><h1>Good food, <span>made simple.</span></h1><p>Discover favourites, save a wishlist, use coupons, pay with Cash on Delivery or use configurable bKash/Nagad and online gateway options, and track every order from your profile.</p><form class="search-bar" action="<?= e(url('foods.php')) ?>"><input name="q" placeholder="Search pizza, burger, coffee…"><button class="btn btn-primary">Search menu</button></form><div class="hero-actions"><a class="btn btn-secondary" href="<?= e(url('foods.php')) ?>">Explore full menu</a><a class="btn btn-light" href="<?= e(url('categories.php')) ?>">Browse categories</a></div></div><div class="hero-visual"><img src="<?= e(url('images/ivan-torres-MQUqbmszGGM-unsplash.jpg')) ?>" alt="Fresh restaurant meal"><div class="floating-card one">🚚 Free delivery over Tk 1,000</div><div class="floating-card two">★ Top-rated favourites</div></div></div></section>
-<div class="container kpi-strip"><div class="stat-card"><span class="muted">Menu items</span><strong><?= $stats['foods'] ?>+</strong></div><div class="stat-card"><span class="muted">Customers</span><strong><?= max($stats['customers'],1) ?>+</strong></div><div class="stat-card"><span class="muted">Delivered orders</span><strong><?= $stats['orders'] ?>+</strong></div><div class="stat-card"><span class="muted">Delivery</span><strong>Fast</strong></div></div>
-<section class="section"><div class="container"><div class="section-head"><div><h2>Explore categories</h2><p>Find your next meal by craving.</p></div><a class="btn btn-light" href="<?= e(url('categories.php')) ?>">All categories</a></div><div class="grid grid-4"><?php foreach($categories as $c):?><a class="category-card" href="<?= e(url('foods.php?category='.(int)$c['id'])) ?>"><img src="<?= e(category_image($c['image_name'])) ?>" alt="<?= e($c['title']) ?>"><div class="overlay"><?= e($c['title']) ?></div></a><?php endforeach;?></div></div></section>
-<?php if($coupon):?><section class="section soft"><div class="container"><div class="promo-card"><div><span class="eyebrow">Limited offer</span><h2>Save on your next order</h2><p>Use this coupon at checkout. Minimum order <?= e(money($coupon['min_order'])) ?>.</p><span class="promo-code"><?= e($coupon['code']) ?></span></div><div><h3><?= $coupon['discount_type']==='Percentage'?e(rtrim(rtrim(number_format((float)$coupon['discount_value'],2), '0'),'.')).'% OFF':e(money($coupon['discount_value'])).' OFF' ?></h3><p>Coupon validity and usage limits are checked securely at checkout.</p></div></div></div></section><?php endif;?>
-<section class="section alt"><div class="container"><div class="section-head"><div><h2>Popular foods</h2><p>Featured dishes with customer rating and live stock.</p></div><a class="btn btn-light" href="<?= e(url('foods.php?sort=rating')) ?>">Top rated</a></div><div class="grid grid-4"><?php foreach($foods as $f):?><article class="food-card"><div class="food-image-wrap"><a href="<?= e(url('food-details.php?id='.$f['id'])) ?>"><img src="<?= e(food_image($f['image_name'])) ?>" alt="<?= e($f['title']) ?>"></a><span class="stock-badge <?= (int)$f['stock_qty']<=5?'low':'' ?>"><?= (int)$f['stock_qty'] ?> in stock</span><?php if(auth_user()):?><form action="<?= e(url('toggle-wishlist.php')) ?>" method="post"><?= csrf_field() ?><input type="hidden" name="food_id" value="<?= (int)$f['id'] ?>"><button class="wish-btn <?= is_wishlisted((int)$f['id'])?'active':'' ?>" title="Wishlist">♥</button></form><?php endif;?></div><div class="food-card-body"><div class="food-meta"><h3><a href="<?= e(url('food-details.php?id='.$f['id'])) ?>"><?= e($f['title']) ?></a></h3><span class="rating">★ <?= number_format((float)$f['rating'],1) ?></span></div><p class="muted"><?= e(mb_strimwidth((string)$f['description'],0,82,'…')) ?></p><div class="price"><?= e(money($f['price'])) ?></div><div class="food-actions"><form action="<?= e(url('add-cart.php')) ?>" method="post"><?= csrf_field() ?><input type="hidden" name="food_id" value="<?= (int)$f['id'] ?>"><button class="btn btn-primary" <?= (int)$f['stock_qty']<1?'disabled':'' ?>>Add to cart</button></form><a class="btn btn-light" href="<?= e(url('food-details.php?id='.$f['id'])) ?>">Details</a></div></div></article><?php endforeach;?></div></div></section>
-<section class="section"><div class="container"><div class="section-head"><div><h2>Everything in one account</h2><p>A complete ordering flow, not just a menu page.</p></div></div><div class="grid grid-4"><div class="panel"><div class="feature-icon">♡</div><h3>Wishlist</h3><p class="muted">Save foods and return to them later.</p></div><div class="panel"><div class="feature-icon">🏷</div><h3>Coupons</h3><p class="muted">Validated discounts with usage rules.</p></div><div class="panel"><div class="feature-icon">💳</div><h3>Flexible payment</h3><p class="muted">COD plus manual bKash and Nagad verification.</p></div><div class="panel"><div class="feature-icon">📦</div><h3>Order tracking</h3><p class="muted">Ordered → Preparing → On Delivery → Delivered.</p></div></div></div></section>
-<?php include __DIR__.'/partials-font/footer.php';?>
+require_once __DIR__ . '/config/constants.php';
+$pageTitle = APP_NAME . ' — Fresh Food Delivered';
+$categories = db()->query("SELECT * FROM tbl_category WHERE active='Yes' AND featured='Yes' ORDER BY id DESC LIMIT 4")->fetchAll();
+$foods = db()->query("SELECT f.*,COALESCE(AVG(r.rating),0) rating,COUNT(r.id) review_count FROM tbl_food f LEFT JOIN tbl_review r ON r.food_id=f.id AND r.status='Published' WHERE f.active='Yes' AND f.featured='Yes' GROUP BY f.id ORDER BY rating DESC,f.id DESC LIMIT 8")->fetchAll();
+$coupon = db()->query("SELECT * FROM tbl_coupon WHERE active='Yes' AND starts_at<=NOW() AND ends_at>=NOW() ORDER BY id LIMIT 1")->fetch();
+$stats = ['foods' => (int)db()->query("SELECT COUNT(*) FROM tbl_food WHERE active='Yes'")->fetchColumn(), 'customers' => (int)db()->query("SELECT COUNT(*) FROM tbl_user WHERE account_status='Active'")->fetchColumn(), 'orders' => (int)db()->query("SELECT COUNT(*) FROM tbl_order WHERE status='Delivered'")->fetchColumn()];
+include __DIR__ . '/partials-font/menu.php'; ?>
+<section class="hero">
+    <div class="container hero-grid">
+        <div><span class="eyebrow">Fresh • Fast • Secure</span>
+            <h1>Good food, <span>made simple.</span></h1>
+            <p>Discover favourites, save a wishlist, use coupons, pay with Cash on Delivery or use configurable bKash/Nagad and online gateway options, and track every order from your profile.</p>
+            <form class="search-bar" action="<?= e(url('foods.php')) ?>"><input name="q" placeholder="Search pizza, burger, coffee…"><button class="btn btn-primary">Search menu</button></form>
+            <div class="hero-actions"><a class="btn btn-secondary" href="<?= e(url('foods.php')) ?>">Explore full menu</a><a class="btn btn-light" href="<?= e(url('categories.php')) ?>">Browse categories</a></div>
+        </div>
+        <div class="hero-visual"><img src="<?= e(url('images/ivan-torres-MQUqbmszGGM-unsplash.jpg')) ?>" alt="Fresh restaurant meal">
+            <div class="floating-card one">🚚 Free delivery over Tk 1,000</div>
+            <div class="floating-card two">★ Top-rated favourites</div>
+        </div>
+    </div>
+</section>
+<div class="container kpi-strip">
+    <div class="stat-card"><span class="muted">Menu items</span><strong><?= $stats['foods'] ?>+</strong></div>
+    <div class="stat-card"><span class="muted">Customers</span><strong><?= max($stats['customers'], 1) ?>+</strong></div>
+    <div class="stat-card"><span class="muted">Delivered orders</span><strong><?= $stats['orders'] ?>+</strong></div>
+    <div class="stat-card"><span class="muted">Delivery</span><strong>Fast</strong></div>
+</div>
+<section class="section">
+    <div class="container">
+        <div class="section-head">
+            <div>
+                <h2>Explore categories</h2>
+                <p>Find your next meal by craving.</p>
+            </div><a class="btn btn-light" href="<?= e(url('categories.php')) ?>">All categories</a>
+        </div>
+        <div class="grid grid-4"><?php foreach ($categories as $c): ?><a class="category-card" href="<?= e(url('foods.php?category=' . (int)$c['id'])) ?>"><img src="<?= e(category_image($c['image_name'])) ?>" alt="<?= e($c['title']) ?>">
+                    <div class="overlay"><?= e($c['title']) ?></div>
+                </a><?php endforeach; ?></div>
+    </div>
+</section>
+<?php if ($coupon): ?><section class="section soft">
+        <div class="container">
+            <div class="promo-card">
+                <div><span class="eyebrow">Limited offer</span>
+                    <h2>Save on your next order</h2>
+                    <p>Use this coupon at checkout. Minimum order <?= e(money($coupon['min_order'])) ?>.</p><span class="promo-code"><?= e($coupon['code']) ?></span>
+                </div>
+                <div>
+                    <h3><?= $coupon['discount_type'] === 'Percentage' ? e(rtrim(rtrim(number_format((float)$coupon['discount_value'], 2), '0'), '.')) . '% OFF' : e(money($coupon['discount_value'])) . ' OFF' ?></h3>
+                    <p>Coupon validity and usage limits are checked securely at checkout.</p>
+                </div>
+            </div>
+        </div>
+    </section><?php endif; ?>
+<section class="section alt">
+    <div class="container">
+        <div class="section-head">
+            <div>
+                <h2>Popular foods</h2>
+                <p>Featured dishes with customer rating and live stock.</p>
+            </div><a class="btn btn-light" href="<?= e(url('foods.php?sort=rating')) ?>">Top rated</a>
+        </div>
+        <div class="grid grid-4"><?php foreach ($foods as $f): ?><article class="food-card">
+                    <div class="food-image-wrap"><a href="<?= e(url('food-details.php?id=' . $f['id'])) ?>"><img src="<?= e(food_image($f['image_name'])) ?>" alt="<?= e($f['title']) ?>"></a><span class="stock-badge <?= (int)$f['stock_qty'] <= 5 ? 'low' : '' ?>"><?= (int)$f['stock_qty'] ?> in stock</span><?php if (auth_user()): ?><form action="<?= e(url('toggle-wishlist.php')) ?>" method="post"><?= csrf_field() ?><input type="hidden" name="food_id" value="<?= (int)$f['id'] ?>"><button class="wish-btn <?= is_wishlisted((int)$f['id']) ? 'active' : '' ?>" title="Wishlist">♥</button></form><?php endif; ?></div>
+                    <div class="food-card-body">
+                        <div class="food-meta">
+                            <h3><a href="<?= e(url('food-details.php?id=' . $f['id'])) ?>"><?= e($f['title']) ?></a></h3><span class="rating">★ <?= number_format((float)$f['rating'], 1) ?></span>
+                        </div>
+                        <p class="muted"><?= e(mb_strimwidth((string)$f['description'], 0, 82, '…')) ?></p>
+                        <div class="price"><?= e(money($f['price'])) ?></div>
+                        <div class="food-actions">
+                            <form action="<?= e(url('add-cart.php')) ?>" method="post"><?= csrf_field() ?><input type="hidden" name="food_id" value="<?= (int)$f['id'] ?>"><button class="btn btn-primary" <?= (int)$f['stock_qty'] < 1 ? 'disabled' : '' ?>>Add to cart</button></form><a class="btn btn-light" href="<?= e(url('food-details.php?id=' . $f['id'])) ?>">Details</a>
+                        </div>
+                    </div>
+                </article><?php endforeach; ?></div>
+    </div>
+</section>
+<section class="section">
+    <div class="container">
+        <div class="section-head">
+            <div>
+                <h2>Everything in one account</h2>
+                <p>A complete ordering flow, not just a menu page.</p>
+            </div>
+        </div>
+        <div class="grid grid-4">
+            <div class="panel">
+                <div class="feature-icon">♡</div>
+                <h3>Wishlist</h3>
+                <p class="muted">Save foods and return to them later.</p>
+            </div>
+            <div class="panel">
+                <div class="feature-icon">🏷</div>
+                <h3>Coupons</h3>
+                <p class="muted">Validated discounts with usage rules.</p>
+            </div>
+            <div class="panel">
+                <div class="feature-icon">💳</div>
+                <h3>Flexible payment</h3>
+                <p class="muted">COD plus manual bKash and Nagad verification.</p>
+            </div>
+            <div class="panel">
+                <div class="feature-icon">📦</div>
+                <h3>Order tracking</h3>
+                <p class="muted">Ordered → Preparing → On Delivery → Delivered.</p>
+            </div>
+        </div>
+    </div>
+</section>
+<?php include __DIR__ . '/partials-font/footer.php'; ?>

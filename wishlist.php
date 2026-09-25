@@ -1,3 +1,31 @@
 <?php
-require_once __DIR__.'/config/constants.php';$u=require_login();$s=db()->prepare("SELECT f.*,c.title category_title,COALESCE(AVG(r.rating),0) rating FROM tbl_wishlist w JOIN tbl_food f ON f.id=w.food_id JOIN tbl_category c ON c.id=f.category_id LEFT JOIN tbl_review r ON r.food_id=f.id AND r.status='Published' WHERE w.user_id=? GROUP BY f.id ORDER BY w.id DESC");$s->execute([$u['id']]);$foods=$s->fetchAll();$pageTitle='Wishlist — '.APP_NAME;include __DIR__.'/partials-font/menu.php';?>
-<section class="page-hero"><div class="container"><h1>My Wishlist</h1><p>Foods you saved for later.</p></div></section><section class="section"><div class="container"><?php if(!$foods):?><div class="panel empty"><h2>Your wishlist is empty</h2><p>Save a few favourites from the menu.</p><a class="btn btn-primary" href="<?= e(url('foods.php')) ?>">Browse menu</a></div><?php else:?><div class="grid grid-4"><?php foreach($foods as $f):?><article class="food-card"><div class="food-image-wrap"><a href="<?= e(url('food-details.php?id='.$f['id'])) ?>"><img src="<?= e(food_image($f['image_name'])) ?>" alt=""></a><form action="<?= e(url('toggle-wishlist.php')) ?>" method="post"><?= csrf_field() ?><input type="hidden" name="food_id" value="<?= (int)$f['id'] ?>"><button class="wish-btn active">♥</button></form></div><div class="food-card-body"><h3><?= e($f['title']) ?></h3><div class="food-meta"><span class="price"><?= e(money($f['price'])) ?></span><span class="rating">★ <?= number_format((float)$f['rating'],1) ?></span></div><div class="food-actions"><form action="<?= e(url('add-cart.php')) ?>" method="post"><?= csrf_field() ?><input type="hidden" name="food_id" value="<?= (int)$f['id'] ?>"><button class="btn btn-primary" <?= (int)$f['stock_qty']<1?'disabled':'' ?>>Add to cart</button></form><a class="btn btn-light" href="<?= e(url('food-details.php?id='.$f['id'])) ?>">Details</a></div></div></article><?php endforeach;?></div><?php endif;?></div></section><?php include __DIR__.'/partials-font/footer.php';?>
+require_once __DIR__ . '/config/constants.php';
+$u = require_login();
+$s = db()->prepare("SELECT f.*,c.title category_title,COALESCE(AVG(r.rating),0) rating FROM tbl_wishlist w JOIN tbl_food f ON f.id=w.food_id JOIN tbl_category c ON c.id=f.category_id LEFT JOIN tbl_review r ON r.food_id=f.id AND r.status='Published' WHERE w.user_id=? GROUP BY f.id ORDER BY w.id DESC");
+$s->execute([$u['id']]);
+$foods = $s->fetchAll();
+$pageTitle = 'Wishlist — ' . APP_NAME;
+include __DIR__ . '/partials-font/menu.php'; ?>
+<section class="page-hero">
+    <div class="container">
+        <h1>My Wishlist</h1>
+        <p>Foods you saved for later.</p>
+    </div>
+</section>
+<section class="section">
+    <div class="container"><?php if (!$foods): ?><div class="panel empty">
+                <h2>Your wishlist is empty</h2>
+                <p>Save a few favourites from the menu.</p><a class="btn btn-primary" href="<?= e(url('foods.php')) ?>">Browse menu</a>
+            </div><?php else: ?><div class="grid grid-4"><?php foreach ($foods as $f): ?><article class="food-card">
+                        <div class="food-image-wrap"><a href="<?= e(url('food-details.php?id=' . $f['id'])) ?>"><img src="<?= e(food_image($f['image_name'])) ?>" alt=""></a>
+                            <form action="<?= e(url('toggle-wishlist.php')) ?>" method="post"><?= csrf_field() ?><input type="hidden" name="food_id" value="<?= (int)$f['id'] ?>"><button class="wish-btn active">♥</button></form>
+                        </div>
+                        <div class="food-card-body">
+                            <h3><?= e($f['title']) ?></h3>
+                            <div class="food-meta"><span class="price"><?= e(money($f['price'])) ?></span><span class="rating">★ <?= number_format((float)$f['rating'], 1) ?></span></div>
+                            <div class="food-actions">
+                                <form action="<?= e(url('add-cart.php')) ?>" method="post"><?= csrf_field() ?><input type="hidden" name="food_id" value="<?= (int)$f['id'] ?>"><button class="btn btn-primary" <?= (int)$f['stock_qty'] < 1 ? 'disabled' : '' ?>>Add to cart</button></form><a class="btn btn-light" href="<?= e(url('food-details.php?id=' . $f['id'])) ?>">Details</a>
+                            </div>
+                        </div>
+                    </article><?php endforeach; ?></div><?php endif; ?></div>
+</section><?php include __DIR__ . '/partials-font/footer.php'; ?>

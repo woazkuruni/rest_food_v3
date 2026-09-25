@@ -142,128 +142,201 @@ include __DIR__ . '/partials-font/menu.php';
 <section class="profile-cover">
     <div class="container">
         <div class="profile-cover-inner">
-            <div><span class="eyebrow">Customer account</span><h1>My Profile</h1><p>Manage your personal information, delivery addresses and account security from one place.</p></div>
+            <div><span class="eyebrow">Customer account</span>
+                <h1>My Profile</h1>
+                <p>Manage your personal information, delivery addresses and account security from one place.</p>
+            </div>
             <div class="profile-cover-actions"><a class="btn btn-light" href="<?= e(url('my_order.php')) ?>">My orders</a><a class="btn btn-primary" href="<?= e(url('foods.php')) ?>">Order food</a></div>
         </div>
     </div>
 </section>
 
-<section class="section profile-section"><div class="container">
-<div class="profile-layout">
-<aside class="profile-sidebar">
-    <div class="panel profile-summary-card">
-        <div class="avatar-shell"><img class="avatar avatar-lg" id="profile-preview" src="<?= e(user_image($user['image_name'])) ?>" alt="<?= e($user['full_name']) ?>"><span class="avatar-status" title="Active account"></span></div>
-        <h2><?= e($user['full_name']) ?></h2>
-        <p class="profile-handle">@<?= e($user['user_name']) ?></p>
-        <span class="status status-success">Active customer</span>
-        <div class="profile-meta-list">
-            <div><span>✉</span><div><small>Email</small><strong><?= e($user['email']) ?></strong></div></div>
-            <div><span>☎</span><div><small>Phone</small><strong><?= e($user['phone_number']) ?></strong></div></div>
-            <div><span>◷</span><div><small>Member since</small><strong><?= e($memberSince) ?></strong></div></div>
-        </div>
-        <div class="completion-block"><div class="completion-head"><span>Profile completion</span><strong><?= $profileCompletion ?>%</strong></div><div class="completion-track"><span style="width:<?= $profileCompletion ?>%"></span></div></div>
-    </div>
-
-    <nav class="profile-nav panel">
-        <a href="#overview">Overview <span>→</span></a>
-        <a href="#account">Personal information <span>→</span></a>
-        <a href="#addresses">Delivery addresses <span>→</span></a>
-        <a href="#security">Password & security <span>→</span></a>
-    </nav>
-</aside>
-
-<main class="profile-content">
-    <section id="overview" class="profile-stats-grid">
-        <div class="stat-card profile-stat"><span class="profile-stat-icon">🧾</span><div><strong><?= (int)$stats['total_orders'] ?></strong><small>Total orders</small></div></div>
-        <div class="stat-card profile-stat"><span class="profile-stat-icon">✓</span><div><strong><?= (int)$stats['delivered_orders'] ?></strong><small>Delivered</small></div></div>
-        <div class="stat-card profile-stat"><span class="profile-stat-icon">♥</span><div><strong><?= $wishlistTotal ?></strong><small>Wishlist</small></div></div>
-        <div class="stat-card profile-stat"><span class="profile-stat-icon">৳</span><div><strong><?= e(money($stats['total_spent'])) ?></strong><small>Order value</small></div></div>
-    </section>
-
-    <section class="panel profile-panel" id="account">
-        <div class="profile-section-head">
-            <div><span class="section-kicker">Account details</span><h2>Personal information</h2><p>Your current account and contact information.</p></div>
-            <button class="btn btn-primary btn-sm" type="button" data-profile-edit-toggle aria-expanded="false">✎ Edit profile</button>
-        </div>
-
-        <div class="profile-view" data-profile-view>
-            <div class="profile-view-photo">
-                <img src="<?= e(user_image($user['image_name'])) ?>" alt="<?= e($user['full_name']) ?>">
-                <div><strong><?= e($user['full_name']) ?></strong><span>@<?= e($user['user_name']) ?></span></div>
-            </div>
-            <div class="profile-info-grid">
-                <div class="profile-info-item"><span class="profile-info-icon">👤</span><div><small>Full name</small><strong><?= e($user['full_name']) ?></strong></div></div>
-                <div class="profile-info-item"><span class="profile-info-icon">@</span><div><small>Username</small><strong><?= e($user['user_name']) ?></strong></div></div>
-                <div class="profile-info-item"><span class="profile-info-icon">✉</span><div><small>Email address</small><strong><?= e($user['email']) ?></strong></div></div>
-                <div class="profile-info-item"><span class="profile-info-icon">☎</span><div><small>Phone number</small><strong><?= e($user['phone_number']) ?></strong></div></div>
-                <div class="profile-info-item profile-info-address"><span class="profile-info-icon">⌂</span><div><small>Primary address</small><strong><?= e($user['address']) ?></strong></div></div>
-            </div>
-        </div>
-
-        <div class="profile-edit-wrap" data-profile-edit hidden>
-            <div class="edit-mode-banner"><div><strong>Edit profile</strong><span>Update only the information you want to change.</span></div><button class="btn btn-light btn-sm" type="button" data-profile-edit-cancel>Cancel</button></div>
-            <form method="post" enctype="multipart/form-data"><?= csrf_field() ?><input type="hidden" name="action" value="profile">
-                <div class="profile-photo-editor">
-                    <img src="<?= e(user_image($user['image_name'])) ?>" alt="" data-secondary-preview>
-                    <div><strong>Profile photo</strong><p class="muted">JPG, PNG or WEBP. Maximum 3 MB.</p><label class="btn btn-light btn-sm" for="profile-image-input">Choose new photo</label><input id="profile-image-input" class="visually-hidden" type="file" name="image" accept="image/jpeg,image/png,image/webp" data-image-input data-preview-target="#profile-preview"></div>
+<section class="section profile-section">
+    <div class="container">
+        <div class="profile-layout">
+            <aside class="profile-sidebar">
+                <div class="panel profile-summary-card">
+                    <div class="avatar-shell"><img class="avatar avatar-lg" id="profile-preview" src="<?= e(user_image($user['image_name'])) ?>" alt="<?= e($user['full_name']) ?>"><span class="avatar-status" title="Active account"></span></div>
+                    <h2><?= e($user['full_name']) ?></h2>
+                    <p class="profile-handle">@<?= e($user['user_name']) ?></p>
+                    <span class="status status-success">Active customer</span>
+                    <div class="profile-meta-list">
+                        <div><span>✉</span>
+                            <div><small>Email</small><strong><?= e($user['email']) ?></strong></div>
+                        </div>
+                        <div><span>☎</span>
+                            <div><small>Phone</small><strong><?= e($user['phone_number']) ?></strong></div>
+                        </div>
+                        <div><span>◷</span>
+                            <div><small>Member since</small><strong><?= e($memberSince) ?></strong></div>
+                        </div>
+                    </div>
+                    <div class="completion-block">
+                        <div class="completion-head"><span>Profile completion</span><strong><?= $profileCompletion ?>%</strong></div>
+                        <div class="completion-track"><span style="width:<?= $profileCompletion ?>%"></span></div>
+                    </div>
                 </div>
-                <div class="form-grid profile-form-grid">
-                    <div class="field"><label>Username</label><input class="input" name="user_name" value="<?= e($user['user_name']) ?>" required><small>Letters, numbers and underscore only.</small></div>
-                    <div class="field"><label>Full name</label><input class="input" name="full_name" value="<?= e($user['full_name']) ?>" required></div>
-                    <div class="field"><label>Email</label><input class="input" type="email" name="email" value="<?= e($user['email']) ?>" required></div>
-                    <div class="field"><label>Phone</label><input class="input" name="phone_number" value="<?= e($user['phone_number']) ?>" required></div>
-                    <div class="field full"><label>Primary address</label><textarea name="address" rows="3" required><?= e($user['address']) ?></textarea><small>This is used as your fallback checkout address.</small></div>
-                </div>
-                <div class="form-actions"><button class="btn btn-primary">Save changes</button><button class="btn btn-light" type="button" data-profile-edit-cancel>Cancel</button></div>
-            </form>
-            <?php if (!empty($user['image_name']) && $user['image_name'] !== 'default_profile.webp'): ?>
-            <form method="post" class="profile-remove-photo"><?= csrf_field() ?><input type="hidden" name="action" value="remove_image"><button class="text-button danger" data-confirm="Remove your current profile photo?">Remove current photo</button></form>
-            <?php endif; ?>
-        </div>
-    </section>
 
-    <section class="panel profile-panel" id="addresses">
-        <div class="profile-section-head"><div><span class="section-kicker">Delivery</span><h2>Saved addresses</h2><p>Save home, office or other delivery locations and choose a default.</p></div><span class="count-chip"><?= $addressTotal ?> saved</span></div>
+                <nav class="profile-nav panel">
+                    <a href="#overview">Overview <span>→</span></a>
+                    <a href="#account">Personal information <span>→</span></a>
+                    <a href="#addresses">Delivery addresses <span>→</span></a>
+                    <a href="#security">Password & security <span>→</span></a>
+                </nav>
+            </aside>
 
-        <div class="address-grid">
-        <?php if (!$addresses): ?><div class="empty compact-empty">No saved addresses yet. Add your first one below.</div><?php endif; ?>
-        <?php foreach ($addresses as $a): ?>
-            <article class="address-card address-card-v2">
-                <div class="address-top"><div><span class="address-icon">⌂</span><strong><?= e($a['label']) ?></strong></div><?php if ($a['is_default']): ?><span class="default-tag">Default</span><?php endif; ?></div>
-                <div class="address-person"><?= e($a['recipient_name']) ?> · <?= e($a['phone_number']) ?></div>
-                <p><?= e($a['address']) ?></p>
-                <div class="address-actions">
-                    <?php if (!$a['is_default']): ?><form method="post"><?= csrf_field() ?><input type="hidden" name="action" value="address_default"><input type="hidden" name="address_id" value="<?= (int)$a['id'] ?>"><button class="btn btn-light btn-sm">Make default</button></form><?php endif; ?>
-                    <button class="btn btn-light btn-sm" type="button" data-address-edit="address-edit-<?= (int)$a['id'] ?>">Edit</button>
-                    <?php if (!$a['is_default']): ?><form method="post"><?= csrf_field() ?><input type="hidden" name="action" value="address_delete"><input type="hidden" name="address_id" value="<?= (int)$a['id'] ?>"><button class="btn btn-danger btn-sm" data-confirm="Delete this saved address?">Delete</button></form><?php endif; ?>
-                </div>
-                <div class="address-edit-panel" id="address-edit-<?= (int)$a['id'] ?>" hidden>
-                    <form method="post"><?= csrf_field() ?><input type="hidden" name="action" value="address_update"><input type="hidden" name="address_id" value="<?= (int)$a['id'] ?>">
-                        <div class="form-grid"><div class="field"><label>Label</label><input class="input" name="label" value="<?= e($a['label']) ?>" required></div><div class="field"><label>Recipient</label><input class="input" name="recipient_name" value="<?= e($a['recipient_name']) ?>" required></div><div class="field"><label>Phone</label><input class="input" name="address_phone" value="<?= e($a['phone_number']) ?>" required></div><div class="field full"><label>Address</label><textarea name="saved_address" rows="3" required><?= e($a['address']) ?></textarea></div></div>
-                        <div class="form-actions"><button class="btn btn-primary btn-sm">Save address</button><button class="btn btn-light btn-sm" type="button" data-address-edit="address-edit-<?= (int)$a['id'] ?>">Close</button></div>
+            <main class="profile-content">
+                <section id="overview" class="profile-stats-grid">
+                    <div class="stat-card profile-stat"><span class="profile-stat-icon">🧾</span>
+                        <div><strong><?= (int)$stats['total_orders'] ?></strong><small>Total orders</small></div>
+                    </div>
+                    <div class="stat-card profile-stat"><span class="profile-stat-icon">✓</span>
+                        <div><strong><?= (int)$stats['delivered_orders'] ?></strong><small>Delivered</small></div>
+                    </div>
+                    <div class="stat-card profile-stat"><span class="profile-stat-icon">♥</span>
+                        <div><strong><?= $wishlistTotal ?></strong><small>Wishlist</small></div>
+                    </div>
+                    <div class="stat-card profile-stat"><span class="profile-stat-icon">৳</span>
+                        <div><strong><?= e(money($stats['total_spent'])) ?></strong><small>Order value</small></div>
+                    </div>
+                </section>
+
+                <section class="panel profile-panel" id="account">
+                    <div class="profile-section-head">
+                        <div><span class="section-kicker">Account details</span>
+                            <h2>Personal information</h2>
+                            <p>Your current account and contact information.</p>
+                        </div>
+                        <button class="btn btn-primary btn-sm" type="button" data-profile-edit-toggle aria-expanded="false">✎ Edit profile</button>
+                    </div>
+
+                    <div class="profile-view" data-profile-view>
+                        <div class="profile-view-photo">
+                            <img src="<?= e(user_image($user['image_name'])) ?>" alt="<?= e($user['full_name']) ?>">
+                            <div><strong><?= e($user['full_name']) ?></strong><span>@<?= e($user['user_name']) ?></span></div>
+                        </div>
+                        <div class="profile-info-grid">
+                            <div class="profile-info-item"><span class="profile-info-icon">👤</span>
+                                <div><small>Full name</small><strong><?= e($user['full_name']) ?></strong></div>
+                            </div>
+                            <div class="profile-info-item"><span class="profile-info-icon">@</span>
+                                <div><small>Username</small><strong><?= e($user['user_name']) ?></strong></div>
+                            </div>
+                            <div class="profile-info-item"><span class="profile-info-icon">✉</span>
+                                <div><small>Email address</small><strong><?= e($user['email']) ?></strong></div>
+                            </div>
+                            <div class="profile-info-item"><span class="profile-info-icon">☎</span>
+                                <div><small>Phone number</small><strong><?= e($user['phone_number']) ?></strong></div>
+                            </div>
+                            <div class="profile-info-item profile-info-address"><span class="profile-info-icon">⌂</span>
+                                <div><small>Primary address</small><strong><?= e($user['address']) ?></strong></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="profile-edit-wrap" data-profile-edit hidden>
+                        <div class="edit-mode-banner">
+                            <div><strong>Edit profile</strong><span>Update only the information you want to change.</span></div><button class="btn btn-light btn-sm" type="button" data-profile-edit-cancel>Cancel</button>
+                        </div>
+                        <form method="post" enctype="multipart/form-data"><?= csrf_field() ?><input type="hidden" name="action" value="profile">
+                            <div class="profile-photo-editor">
+                                <img src="<?= e(user_image($user['image_name'])) ?>" alt="" data-secondary-preview>
+                                <div><strong>Profile photo</strong>
+                                    <p class="muted">JPG, PNG or WEBP. Maximum 3 MB.</p><label class="btn btn-light btn-sm" for="profile-image-input">Choose new photo</label><input id="profile-image-input" class="visually-hidden" type="file" name="image" accept="image/jpeg,image/png,image/webp" data-image-input data-preview-target="#profile-preview">
+                                </div>
+                            </div>
+                            <div class="form-grid profile-form-grid">
+                                <div class="field"><label>Username</label><input class="input" name="user_name" value="<?= e($user['user_name']) ?>" required><small>Letters, numbers and underscore only.</small></div>
+                                <div class="field"><label>Full name</label><input class="input" name="full_name" value="<?= e($user['full_name']) ?>" required></div>
+                                <div class="field"><label>Email</label><input class="input" type="email" name="email" value="<?= e($user['email']) ?>" required></div>
+                                <div class="field"><label>Phone</label><input class="input" name="phone_number" value="<?= e($user['phone_number']) ?>" required></div>
+                                <div class="field full"><label>Primary address</label><textarea name="address" rows="3" required><?= e($user['address']) ?></textarea><small>This is used as your fallback checkout address.</small></div>
+                            </div>
+                            <div class="form-actions"><button class="btn btn-primary">Save changes</button><button class="btn btn-light" type="button" data-profile-edit-cancel>Cancel</button></div>
+                        </form>
+                        <?php if (!empty($user['image_name']) && $user['image_name'] !== 'default_profile.webp'): ?>
+                            <form method="post" class="profile-remove-photo"><?= csrf_field() ?><input type="hidden" name="action" value="remove_image"><button class="text-button danger" data-confirm="Remove your current profile photo?">Remove current photo</button></form>
+                        <?php endif; ?>
+                    </div>
+                </section>
+
+                <section class="panel profile-panel" id="addresses">
+                    <div class="profile-section-head">
+                        <div><span class="section-kicker">Delivery</span>
+                            <h2>Saved addresses</h2>
+                            <p>Save home, office or other delivery locations and choose a default.</p>
+                        </div><span class="count-chip"><?= $addressTotal ?> saved</span>
+                    </div>
+
+                    <div class="address-grid">
+                        <?php if (!$addresses): ?><div class="empty compact-empty">No saved addresses yet. Add your first one below.</div><?php endif; ?>
+                        <?php foreach ($addresses as $a): ?>
+                            <article class="address-card address-card-v2">
+                                <div class="address-top">
+                                    <div><span class="address-icon">⌂</span><strong><?= e($a['label']) ?></strong></div><?php if ($a['is_default']): ?><span class="default-tag">Default</span><?php endif; ?>
+                                </div>
+                                <div class="address-person"><?= e($a['recipient_name']) ?> · <?= e($a['phone_number']) ?></div>
+                                <p><?= e($a['address']) ?></p>
+                                <div class="address-actions">
+                                    <?php if (!$a['is_default']): ?><form method="post"><?= csrf_field() ?><input type="hidden" name="action" value="address_default"><input type="hidden" name="address_id" value="<?= (int)$a['id'] ?>"><button class="btn btn-light btn-sm">Make default</button></form><?php endif; ?>
+                                    <button class="btn btn-light btn-sm" type="button" data-address-edit="address-edit-<?= (int)$a['id'] ?>">Edit</button>
+                                    <?php if (!$a['is_default']): ?><form method="post"><?= csrf_field() ?><input type="hidden" name="action" value="address_delete"><input type="hidden" name="address_id" value="<?= (int)$a['id'] ?>"><button class="btn btn-danger btn-sm" data-confirm="Delete this saved address?">Delete</button></form><?php endif; ?>
+                                </div>
+                                <div class="address-edit-panel" id="address-edit-<?= (int)$a['id'] ?>" hidden>
+                                    <form method="post"><?= csrf_field() ?><input type="hidden" name="action" value="address_update"><input type="hidden" name="address_id" value="<?= (int)$a['id'] ?>">
+                                        <div class="form-grid">
+                                            <div class="field"><label>Label</label><input class="input" name="label" value="<?= e($a['label']) ?>" required></div>
+                                            <div class="field"><label>Recipient</label><input class="input" name="recipient_name" value="<?= e($a['recipient_name']) ?>" required></div>
+                                            <div class="field"><label>Phone</label><input class="input" name="address_phone" value="<?= e($a['phone_number']) ?>" required></div>
+                                            <div class="field full"><label>Address</label><textarea name="saved_address" rows="3" required><?= e($a['address']) ?></textarea></div>
+                                        </div>
+                                        <div class="form-actions"><button class="btn btn-primary btn-sm">Save address</button><button class="btn btn-light btn-sm" type="button" data-address-edit="address-edit-<?= (int)$a['id'] ?>">Close</button></div>
+                                    </form>
+                                </div>
+                            </article>
+                        <?php endforeach; ?>
+                    </div>
+
+                    <div class="add-address-box">
+                        <div><span class="section-kicker">New location</span>
+                            <h3>Add another address</h3>
+                        </div>
+                        <form method="post"><?= csrf_field() ?><input type="hidden" name="action" value="address_add">
+                            <div class="form-grid">
+                                <div class="field"><label>Label</label><input class="input" name="label" placeholder="Home, Office…"></div>
+                                <div class="field"><label>Recipient</label><input class="input" name="recipient_name" value="<?= e($user['full_name']) ?>" required></div>
+                                <div class="field"><label>Phone</label><input class="input" name="address_phone" value="<?= e($user['phone_number']) ?>" required></div>
+                                <div class="field full"><label>Address</label><textarea name="saved_address" rows="3" required placeholder="House, road, area, city"></textarea></div>
+                            </div>
+                            <div class="form-actions"><button class="btn btn-light">Save new address</button></div>
+                        </form>
+                    </div>
+                </section>
+
+                <section class="panel profile-panel" id="security">
+                    <div class="profile-section-head">
+                        <div><span class="section-kicker">Security</span>
+                            <h2>Change password</h2>
+                            <p>Use at least 8 characters and avoid reusing an old password.</p>
+                        </div><span class="security-badge">🔒 Protected</span>
+                    </div>
+                    <form method="post"><?= csrf_field() ?><input type="hidden" name="action" value="password">
+                        <div class="form-grid">
+                            <div class="field full"><label>Current password</label>
+                                <div class="password-field"><input class="input" type="password" name="current_password" required data-password-input><button type="button" data-toggle-password>Show</button></div>
+                            </div>
+                            <div class="field"><label>New password</label>
+                                <div class="password-field"><input class="input" type="password" name="new_password" minlength="8" required data-password-input><button type="button" data-toggle-password>Show</button></div>
+                            </div>
+                            <div class="field"><label>Confirm password</label>
+                                <div class="password-field"><input class="input" type="password" name="confirm_password" minlength="8" required data-password-input><button type="button" data-toggle-password>Show</button></div>
+                            </div>
+                        </div>
+                        <div class="form-actions"><button class="btn btn-secondary">Update password</button></div>
                     </form>
-                </div>
-            </article>
-        <?php endforeach; ?>
+                </section>
+            </main>
         </div>
-
-        <div class="add-address-box">
-            <div><span class="section-kicker">New location</span><h3>Add another address</h3></div>
-            <form method="post"><?= csrf_field() ?><input type="hidden" name="action" value="address_add">
-                <div class="form-grid"><div class="field"><label>Label</label><input class="input" name="label" placeholder="Home, Office…"></div><div class="field"><label>Recipient</label><input class="input" name="recipient_name" value="<?= e($user['full_name']) ?>" required></div><div class="field"><label>Phone</label><input class="input" name="address_phone" value="<?= e($user['phone_number']) ?>" required></div><div class="field full"><label>Address</label><textarea name="saved_address" rows="3" required placeholder="House, road, area, city"></textarea></div></div>
-                <div class="form-actions"><button class="btn btn-light">Save new address</button></div>
-            </form>
-        </div>
-    </section>
-
-    <section class="panel profile-panel" id="security">
-        <div class="profile-section-head"><div><span class="section-kicker">Security</span><h2>Change password</h2><p>Use at least 8 characters and avoid reusing an old password.</p></div><span class="security-badge">🔒 Protected</span></div>
-        <form method="post"><?= csrf_field() ?><input type="hidden" name="action" value="password">
-            <div class="form-grid"><div class="field full"><label>Current password</label><div class="password-field"><input class="input" type="password" name="current_password" required data-password-input><button type="button" data-toggle-password>Show</button></div></div><div class="field"><label>New password</label><div class="password-field"><input class="input" type="password" name="new_password" minlength="8" required data-password-input><button type="button" data-toggle-password>Show</button></div></div><div class="field"><label>Confirm password</label><div class="password-field"><input class="input" type="password" name="confirm_password" minlength="8" required data-password-input><button type="button" data-toggle-password>Show</button></div></div></div>
-            <div class="form-actions"><button class="btn btn-secondary">Update password</button></div>
-        </form>
-    </section>
-</main>
-</div>
-</div></section>
+    </div>
+</section>
 <?php include __DIR__ . '/partials-font/footer.php'; ?>

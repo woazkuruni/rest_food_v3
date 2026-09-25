@@ -1,3 +1,66 @@
 <?php
-require_once __DIR__.'/../config/constants.php';$pageTitle='Dashboard';$stats=['orders'=>(int)db()->query('SELECT COUNT(*) FROM tbl_order')->fetchColumn(),'pending'=>(int)db()->query("SELECT COUNT(*) FROM tbl_order WHERE status IN ('Ordered','Preparing')")->fetchColumn(),'customers'=>(int)db()->query("SELECT COUNT(*) FROM tbl_user WHERE account_status='Active'")->fetchColumn(),'revenue'=>(float)db()->query("SELECT COALESCE(SUM(total),0) FROM tbl_order WHERE status='Delivered'")->fetchColumn(),'low_stock'=>(int)db()->query("SELECT COUNT(*) FROM tbl_food WHERE active='Yes' AND stock_qty<=5")->fetchColumn()];$recent=db()->query('SELECT o.id,o.total,o.status,o.payment_status,o.order_date,u.full_name FROM tbl_order o JOIN tbl_user u ON u.id=o.user_id ORDER BY o.id DESC LIMIT 8')->fetchAll();$top=db()->query("SELECT oi.food_name,SUM(oi.quantity) qty FROM tbl_order_item oi JOIN tbl_order o ON o.id=oi.order_id WHERE o.status<>'Cancelled' GROUP BY oi.food_name ORDER BY qty DESC LIMIT 6")->fetchAll();$maxQty=max(array_column($top,'qty')?:[1]);$statusRows=db()->query('SELECT status,COUNT(*) total FROM tbl_order GROUP BY status ORDER BY total DESC')->fetchAll();include __DIR__.'/partial/menu.php';?>
-<div class="admin-title"><div><h1>Dashboard</h1><p class="muted">Sales, operations, inventory and payment overview.</p></div><a class="btn btn-primary" href="<?= e(url('admin/manage-order.php')) ?>">Manage orders</a></div><div class="metric-grid"><div class="metric-card"><span class="muted">Revenue</span><strong><?= e(money($stats['revenue'])) ?></strong></div><div class="metric-card"><span class="muted">All orders</span><strong><?= $stats['orders'] ?></strong></div><div class="metric-card"><span class="muted">Needs action</span><strong><?= $stats['pending'] ?></strong></div><div class="metric-card"><span class="muted">Active customers</span><strong><?= $stats['customers'] ?></strong></div><div class="metric-card"><span class="muted">Low stock foods</span><strong class="<?= $stats['low_stock']?'low-stock':'' ?>"><?= $stats['low_stock'] ?></strong></div></div><br><div class="chart-row"><div class="panel"><h2>Top-selling foods</h2><div class="bar-list"><?php if(!$top):?><p class="muted">No order data yet.</p><?php endif;?><?php foreach($top as $r):?><div><div class="bar-label"><span><?= e($r['food_name']) ?></span><span><?= (int)$r['qty'] ?> sold</span></div><div class="bar-track"><div class="bar-fill" style="width:<?= min(100,round(((int)$r['qty']/$maxQty)*100)) ?>%"></div></div></div><?php endforeach;?></div></div><div class="panel"><h2>Order status</h2><?php foreach($statusRows as $r):?><div class="summary-row"><span><?= e($r['status']) ?></span><strong><?= (int)$r['total'] ?></strong></div><?php endforeach;?></div></div><br><div class="panel"><div class="section-head"><div><h2>Recent orders</h2><p>Latest customer activity.</p></div></div><div class="table-wrap"><table class="table"><thead><tr><th>Order</th><th>Customer</th><th>Total</th><th>Payment</th><th>Status</th><th>Date</th></tr></thead><tbody><?php foreach($recent as $r):?><tr><td><a href="<?= e(url('admin/update-orders.php?id='.$r['id'])) ?>">#<?= 1000+(int)$r['id'] ?></a></td><td><?= e($r['full_name']) ?></td><td><?= e(money($r['total'])) ?></td><td><span class="status <?= e(status_class($r['payment_status'])) ?>"><?= e($r['payment_status']) ?></span></td><td><span class="status <?= e(status_class($r['status'])) ?>"><?= e($r['status']) ?></span></td><td><?= e(date('M d, Y',strtotime($r['order_date']))) ?></td></tr><?php endforeach;?></tbody></table></div></div><?php include __DIR__.'/partial/footer.php';?>
+require_once __DIR__ . '/../config/constants.php';
+$pageTitle = 'Dashboard';
+$stats = ['orders' => (int)db()->query('SELECT COUNT(*) FROM tbl_order')->fetchColumn(), 'pending' => (int)db()->query("SELECT COUNT(*) FROM tbl_order WHERE status IN ('Ordered','Preparing')")->fetchColumn(), 'customers' => (int)db()->query("SELECT COUNT(*) FROM tbl_user WHERE account_status='Active'")->fetchColumn(), 'revenue' => (float)db()->query("SELECT COALESCE(SUM(total),0) FROM tbl_order WHERE status='Delivered'")->fetchColumn(), 'low_stock' => (int)db()->query("SELECT COUNT(*) FROM tbl_food WHERE active='Yes' AND stock_qty<=5")->fetchColumn()];
+$recent = db()->query('SELECT o.id,o.total,o.status,o.payment_status,o.order_date,u.full_name FROM tbl_order o JOIN tbl_user u ON u.id=o.user_id ORDER BY o.id DESC LIMIT 8')->fetchAll();
+$top = db()->query("SELECT oi.food_name,SUM(oi.quantity) qty FROM tbl_order_item oi JOIN tbl_order o ON o.id=oi.order_id WHERE o.status<>'Cancelled' GROUP BY oi.food_name ORDER BY qty DESC LIMIT 6")->fetchAll();
+$maxQty = max(array_column($top, 'qty') ?: [1]);
+$statusRows = db()->query('SELECT status,COUNT(*) total FROM tbl_order GROUP BY status ORDER BY total DESC')->fetchAll();
+include __DIR__ . '/partial/menu.php'; ?>
+<div class="admin-title">
+    <div>
+        <h1>Dashboard</h1>
+        <p class="muted">Sales, operations, inventory and payment overview.</p>
+    </div><a class="btn btn-primary" href="<?= e(url('admin/manage-order.php')) ?>">Manage orders</a>
+</div>
+<div class="metric-grid">
+    <div class="metric-card"><span class="muted">Revenue</span><strong><?= e(money($stats['revenue'])) ?></strong></div>
+    <div class="metric-card"><span class="muted">All orders</span><strong><?= $stats['orders'] ?></strong></div>
+    <div class="metric-card"><span class="muted">Needs action</span><strong><?= $stats['pending'] ?></strong></div>
+    <div class="metric-card"><span class="muted">Active customers</span><strong><?= $stats['customers'] ?></strong></div>
+    <div class="metric-card"><span class="muted">Low stock foods</span><strong class="<?= $stats['low_stock'] ? 'low-stock' : '' ?>"><?= $stats['low_stock'] ?></strong></div>
+</div><br>
+<div class="chart-row">
+    <div class="panel">
+        <h2>Top-selling foods</h2>
+        <div class="bar-list"><?php if (!$top): ?><p class="muted">No order data yet.</p><?php endif; ?><?php foreach ($top as $r): ?><div>
+                    <div class="bar-label"><span><?= e($r['food_name']) ?></span><span><?= (int)$r['qty'] ?> sold</span></div>
+                    <div class="bar-track">
+                        <div class="bar-fill" style="width:<?= min(100, round(((int)$r['qty'] / $maxQty) * 100)) ?>%"></div>
+                    </div>
+                </div><?php endforeach; ?></div>
+    </div>
+    <div class="panel">
+        <h2>Order status</h2><?php foreach ($statusRows as $r): ?><div class="summary-row"><span><?= e($r['status']) ?></span><strong><?= (int)$r['total'] ?></strong></div><?php endforeach; ?>
+    </div>
+</div><br>
+<div class="panel">
+    <div class="section-head">
+        <div>
+            <h2>Recent orders</h2>
+            <p>Latest customer activity.</p>
+        </div>
+    </div>
+    <div class="table-wrap">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Order</th>
+                    <th>Customer</th>
+                    <th>Total</th>
+                    <th>Payment</th>
+                    <th>Status</th>
+                    <th>Date</th>
+                </tr>
+            </thead>
+            <tbody><?php foreach ($recent as $r): ?><tr>
+                        <td><a href="<?= e(url('admin/update-orders.php?id=' . $r['id'])) ?>">#<?= 1000 + (int)$r['id'] ?></a></td>
+                        <td><?= e($r['full_name']) ?></td>
+                        <td><?= e(money($r['total'])) ?></td>
+                        <td><span class="status <?= e(status_class($r['payment_status'])) ?>"><?= e($r['payment_status']) ?></span></td>
+                        <td><span class="status <?= e(status_class($r['status'])) ?>"><?= e($r['status']) ?></span></td>
+                        <td><?= e(date('M d, Y', strtotime($r['order_date']))) ?></td>
+                    </tr><?php endforeach; ?></tbody>
+        </table>
+    </div>
+</div><?php include __DIR__ . '/partial/footer.php'; ?>

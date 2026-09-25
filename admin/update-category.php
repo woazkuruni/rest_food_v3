@@ -1,5 +1,47 @@
 <?php
-require_once __DIR__.'/../config/constants.php';require_admin();$id=filter_input(INPUT_GET,'id',FILTER_VALIDATE_INT);if(!$id)redirect('admin/manage-category.php');$stmt=db()->prepare('SELECT * FROM tbl_category WHERE id=?');$stmt->execute([$id]);$row=$stmt->fetch();if(!$row){flash('error','Category not found.');redirect('admin/manage-category.php');}
-if(is_post()){verify_csrf();$title=trim((string)($_POST['title']??''));$featured=($_POST['featured']??'No')==='Yes'?'Yes':'No';$active=($_POST['active']??'No')==='Yes'?'Yes':'No';try{$image=upload_image($_FILES['image']??[],'Category',$row['image_name']);$stmt=db()->prepare('UPDATE tbl_category SET title=?,image_name=?,featured=?,active=? WHERE id=?');$stmt->execute([$title,$image,$featured,$active,$id]);flash('success','Category updated.');redirect('admin/manage-category.php');}catch(Throwable $e){flash('error',$e->getMessage());}}
-$pageTitle='Edit Category';include __DIR__.'/partial/menu.php';?>
-<div class="admin-title"><h1>Edit Category</h1></div><div class="panel admin-form"><form method="post" enctype="multipart/form-data"><?= csrf_field() ?><div class="field"><label>Title</label><input class="input" name="title" value="<?= e($_POST['title']??$row['title']) ?>" required></div><br><img class="thumb" src="<?= e(category_image($row['image_name'])) ?>" alt=""><br><div class="field"><label>Replace image</label><input class="input" type="file" name="image" accept="image/jpeg,image/png,image/webp"></div><br><div class="form-grid"><div class="field"><label>Featured</label><select name="featured"><option <?= $row['featured']==='No'?'selected':'' ?>>No</option><option <?= $row['featured']==='Yes'?'selected':'' ?>>Yes</option></select></div><div class="field"><label>Active</label><select name="active"><option <?= $row['active']==='Yes'?'selected':'' ?>>Yes</option><option <?= $row['active']==='No'?'selected':'' ?>>No</option></select></div></div><br><button class="btn btn-primary">Save changes</button></form></div><?php include __DIR__.'/partial/footer.php';?>
+require_once __DIR__ . '/../config/constants.php';
+require_admin();
+$id = filter_input(INPUT_GET, 'id', FILTER_VALIDATE_INT);
+if (!$id) redirect('admin/manage-category.php');
+$stmt = db()->prepare('SELECT * FROM tbl_category WHERE id=?');
+$stmt->execute([$id]);
+$row = $stmt->fetch();
+if (!$row) {
+    flash('error', 'Category not found.');
+    redirect('admin/manage-category.php');
+}
+if (is_post()) {
+    verify_csrf();
+    $title = trim((string)($_POST['title'] ?? ''));
+    $featured = ($_POST['featured'] ?? 'No') === 'Yes' ? 'Yes' : 'No';
+    $active = ($_POST['active'] ?? 'No') === 'Yes' ? 'Yes' : 'No';
+    try {
+        $image = upload_image($_FILES['image'] ?? [], 'Category', $row['image_name']);
+        $stmt = db()->prepare('UPDATE tbl_category SET title=?,image_name=?,featured=?,active=? WHERE id=?');
+        $stmt->execute([$title, $image, $featured, $active, $id]);
+        flash('success', 'Category updated.');
+        redirect('admin/manage-category.php');
+    } catch (Throwable $e) {
+        flash('error', $e->getMessage());
+    }
+}
+$pageTitle = 'Edit Category';
+include __DIR__ . '/partial/menu.php'; ?>
+<div class="admin-title">
+    <h1>Edit Category</h1>
+</div>
+<div class="panel admin-form">
+    <form method="post" enctype="multipart/form-data"><?= csrf_field() ?><div class="field"><label>Title</label><input class="input" name="title" value="<?= e($_POST['title'] ?? $row['title']) ?>" required></div><br><img class="thumb" src="<?= e(category_image($row['image_name'])) ?>" alt=""><br>
+        <div class="field"><label>Replace image</label><input class="input" type="file" name="image" accept="image/jpeg,image/png,image/webp"></div><br>
+        <div class="form-grid">
+            <div class="field"><label>Featured</label><select name="featured">
+                    <option <?= $row['featured'] === 'No' ? 'selected' : '' ?>>No</option>
+                    <option <?= $row['featured'] === 'Yes' ? 'selected' : '' ?>>Yes</option>
+                </select></div>
+            <div class="field"><label>Active</label><select name="active">
+                    <option <?= $row['active'] === 'Yes' ? 'selected' : '' ?>>Yes</option>
+                    <option <?= $row['active'] === 'No' ? 'selected' : '' ?>>No</option>
+                </select></div>
+        </div><br><button class="btn btn-primary">Save changes</button>
+    </form>
+</div><?php include __DIR__ . '/partial/footer.php'; ?>
