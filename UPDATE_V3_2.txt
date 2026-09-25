@@ -1,0 +1,9 @@
+SHU.FOOD V3.2 PROFILE UX UPDATE
+
+- Existing project/database name unchanged.
+- Personal information now opens in clean read-only view mode.
+- A separate "Edit profile" button reveals the editable form only when needed.
+- Save and Cancel return the customer to normal profile view.
+- Profile photo editing/removal is kept inside edit mode.
+- Saved addresses continue to use their own Edit buttons.
+- Password/security remains a separate section.

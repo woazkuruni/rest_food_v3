@@ -1,0 +1,27 @@
+SHU FOOD V3.1 UPDATE
+====================
+
+This package keeps the existing project folder/URL: rest_food_v3
+and uses the same existing database schema. No new table or column is required for this V3.1 update.
+
+Current local database configured in .env:
+DB_NAME=rest_foodv3
+
+What changed in V3.1:
+- Wider fluid desktop layout; less unused space on large screens.
+- Improved laptop/tablet/mobile responsiveness.
+- Larger, clearer SHU Food header logo.
+- Rebuilt customer profile dashboard.
+- Edit saved addresses; add/default/delete still supported.
+- Profile photo preview and remove option.
+- Password show/hide controls.
+- Rebuilt checkout/payment UI.
+- Server-side coupon quote endpoint for exact payable amount.
+- bKash/Nagad exact-total confirmation before manual transaction submission.
+- Improved payment status in order details.
+- Existing COD, bKash/Nagad verification and optional SSLCOMMERZ backend retained.
+
+IMPORTANT:
+- Existing V3 database data can be kept. Do NOT re-import schema.sql if you already have working data.
+- For bKash/Nagad, replace BKASH_NUMBER / NAGAD_NUMBER in .env with your real merchant number.
+- For SSLCOMMERZ, add your own credentials and enable SSLCOMMERZ_ENABLED=true.

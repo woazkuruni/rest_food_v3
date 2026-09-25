@@ -1,0 +1,27 @@
+SHU FOOD V3 — START HERE
+
+1) Put folder here:
+   C:\xampp\htdocs\rest_food_v3
+
+2) Start Apache + MySQL in XAMPP.
+
+3) phpMyAdmin -> create database:
+   rest_foodv3
+
+4) Import:
+   database/schema.sql
+
+5) Open:
+   http://localhost/rest_food_v3/
+
+ADMIN:
+   http://localhost/rest_food_v3/admin/login.php
+   Username: admin
+   Password: Admin@123
+
+PAYMENT:
+- Cash on Delivery works immediately.
+- Put real BKASH_NUMBER / NAGAD_NUMBER in .env to enable manual mobile-payment submission.
+- SSLCOMMERZ is included but disabled until sandbox/merchant credentials + a publicly reachable APP_URL are configured.
+
+See README.md for full details.

@@ -1,0 +1,1 @@
+<?php require_once __DIR__.'/config/constants.php';logout_auth();flash('success','You have been logged out.');redirect('login.php');
