@@ -1,4 +1,4 @@
-SHU FOOD V3 — START HERE
+Velora FOOD V3 — START HERE
 
 1) Put folder here:
    C:\xampp\htdocs\rest_food_v3

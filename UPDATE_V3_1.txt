@@ -1,4 +1,4 @@
-SHU FOOD V3.1 UPDATE
+Velora FOOD V3.1 UPDATE
 ====================
 
 This package keeps the existing project folder/URL: rest_food_v3
@@ -10,7 +10,7 @@ DB_NAME=rest_foodv3
 What changed in V3.1:
 - Wider fluid desktop layout; less unused space on large screens.
 - Improved laptop/tablet/mobile responsiveness.
-- Larger, clearer SHU Food header logo.
+- Larger, clearer Velora Food header logo.
 - Rebuilt customer profile dashboard.
 - Edit saved addresses; add/default/delete still supported.
 - Profile photo preview and remove option.

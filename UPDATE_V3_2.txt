@@ -1,4 +1,4 @@
-SHU.FOOD V3.2 PROFILE UX UPDATE
+Velora.FOOD V3.2 PROFILE UX UPDATE
 
 - Existing project/database name unchanged.
 - Personal information now opens in clean read-only view mode.

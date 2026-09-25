@@ -33,7 +33,7 @@ function env_value(string $key, string $default = ''): string
     return $value === false ? $default : $value;
 }
 
-define('APP_NAME', env_value('APP_NAME', 'SHU Food'));
+define('APP_NAME', env_value('APP_NAME', 'Velora Food'));
 define('SITEURL', rtrim(env_value('APP_URL', 'http://localhost/rest_food_v3/'), '/') . '/');
 define('APP_ENV', env_value('APP_ENV', 'production'));
 

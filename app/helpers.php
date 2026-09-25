@@ -77,7 +77,7 @@ function http_json_get(string $url): array {
 }
 function sslcommerz_create_session(array $order,array $user): array {
     if(!sslcommerz_enabled()) throw new RuntimeException('SSLCOMMERZ is not configured.');
-    $tranId='SHU'.$order['id'].'_'.bin2hex(random_bytes(5));
+    $tranId='Velora'.$order['id'].'_'.bin2hex(random_bytes(5));
     $data=http_form_post(sslcommerz_base().'/gwprocess/v4/api.php',[
         'store_id'=>env_value('SSLCOMMERZ_STORE_ID'),'store_passwd'=>env_value('SSLCOMMERZ_STORE_PASSWORD'),'total_amount'=>number_format((float)$order['total'],2,'.',''),'currency'=>'BDT','tran_id'=>$tranId,
         'success_url'=>url('sslcommerz-callback.php?mode=success'),'fail_url'=>url('sslcommerz-callback.php?mode=fail'),'cancel_url'=>url('sslcommerz-callback.php?mode=cancel'),'ipn_url'=>url('sslcommerz-callback.php?mode=ipn'),

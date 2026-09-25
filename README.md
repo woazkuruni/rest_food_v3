@@ -1,335 +1,137 @@
-# 🍽️ SHU Food — Restaurant Food Ordering & Management System
+# Velora Food V3 — Final Upgraded Restaurant Ordering System
 
-A responsive full-stack restaurant food ordering and management system built with **PHP, MySQL, HTML, CSS, and JavaScript**.
+A complete PHP + MySQL restaurant ordering project upgraded from the 2024 version.
 
-SHU Food provides a complete customer ordering experience together with a dedicated admin panel for managing foods, categories, customers, coupons, reviews, inventory, orders, and payments.
+## Main customer features
 
----
-
-## ✨ Features
-
-### 👤 Customer
-- Secure registration and login
-- Responsive customer homepage
-- Browse foods and categories
-- Search, filter, sort, and paginate foods
-- Food details page
-- Add to cart and update quantities
-- Wishlist system
-- Coupon support
-- Secure checkout
+- Premium responsive homepage and navigation
+- Categories, menu, search, category filter, price range filter, sorting and pagination
+- Food detail page with live stock and ratings
+- Customer registration/login with secure password hashing
+- Editable username, full name, email, phone, address and profile image
+- Multiple saved delivery addresses and default address
+- User-specific cart with quantity/stock validation
+- Wishlist
+- Verified-purchase rating and review system
+- Coupon codes with minimum order, expiry, usage limit and one-use-per-customer rules
+- Secure checkout with server-side price/stock validation
+- Free-delivery threshold
 - Cash on Delivery
-- bKash / Nagad manual payment workflow
-- Optional SSLCommerz integration
-- Order history and order details
-- Order cancellation where applicable
-- Printable invoice
-- Rating and review system
-- Customer profile dashboard
-- Edit profile information
-- Profile photo upload
-- Change password
-- Multiple saved delivery addresses
-- Default delivery address selection
+- Optional manual bKash/Nagad payment submission with transaction ID and admin verification
+- Optional SSLCOMMERZ hosted online gateway for card/bank/mobile payments when merchant credentials are configured
+- Order status tracking
+- Customer cancellation for eligible unpaid orders, with stock and coupon restoration
+- Order details and printable invoice
 
-### 🛠️ Admin
+## Main admin features
+
 - Separate secure admin authentication
-- Dashboard statistics
-- Revenue and order overview
-- Manage foods
-- Manage categories
-- Manage inventory / stock
-- Manage customers
-- Block / unblock customers
-- Manage coupons
-- Moderate reviews
-- Manage orders
-- Update order status
-- Verify manual payments
-- Low-stock monitoring
-- Basic sales analytics
+- Dashboard KPIs: revenue, orders, customers, pending work and low-stock items
+- Top-selling food analytics and order-status summary
+- Administrator management
+- Category management
+- Food management with stock/inventory
+- Customer search + block/unblock
+- Coupon management
+- Review moderation
+- Order status and payment verification management
 
-### 🔐 Security
+## Security upgrades
+
 - PDO prepared statements
-- Password hashing with `password_hash()`
-- CSRF protection
-- Role-based authentication
-- Secure customer/admin session separation
-- Server-side price verification
-- Server-side coupon validation
-- Output escaping
-- Secure image upload validation
-- Environment-based configuration
-- `.env` excluded from Git
+- `password_hash()` / `password_verify()`
+- Legacy MD5 password upgrade on successful login only
+- CSRF tokens for state-changing forms
+- Role-separated customer/admin sessions
+- Session ID regeneration after login/logout
+- User-specific cart/order/address/wishlist access
+- Output escaping with `htmlspecialchars()`
+- Image MIME/type/size checks and random upload filenames
+- Server-side price, coupon and inventory validation
+- Database transactions for checkout/cancellation
+- `.env` based configuration
 
----
+## Requirements
 
-## 🧰 Technologies Used
+- PHP 8.1+ recommended
+- MySQL 5.7+/MySQL 8 or compatible MariaDB
+- PHP PDO MySQL extension
+- PHP Fileinfo extension
+- PHP cURL extension only if SSLCOMMERZ is enabled
+- XAMPP/WAMP/LAMP or another PHP web server
 
-- PHP
-- MySQL / MariaDB
-- HTML5
-- CSS3
-- JavaScript
-- PDO
-- Apache
-- XAMPP
+## Fresh installation
 
----
+1. Copy the `rest_food_v3` folder into `C:\xampp\htdocs\`.
+2. Start Apache and MySQL.
+3. Open phpMyAdmin and create a database named `rest_foodv3`.
+4. Import `database/schema.sql` into that database.
+5. Check `.env`. The defaults are ready for a standard XAMPP setup.
+6. Open `http://localhost/rest_food_v3/`.
+7. Admin: `http://localhost/rest_food_v3/admin/login.php`.
 
-## 📁 Project Structure
+### Default administrator
 
-```text
-rest_food_v3/
-├── admin/
-├── app/
-├── assets/
-├── config/
-├── css/
-├── database/
-│   └── schema.sql
-├── images/
-├── partials-font/
-├── .env.example
-├── .gitignore
-├── .htaccess
-├── index.php
-├── login.php
-├── register.php
-├── cart.php
-├── order.php
-├── profile.php
-├── wishlist.php
-├── README.md
-└── ...
-```
+- Username: `admin`
+- Password: `Admin@123`
 
----
+Change this password after first login.
 
-## 🚀 Installation
-
-### 1. Clone the repository
-
-```bash
-git clone https://github.com/woazkuruni/rest_food_v3.git
-```
-
-Move the project into your XAMPP `htdocs` directory:
-
-```text
-C:\xampp\htdocs\rest_food_v3
-```
-
-### 2. Start XAMPP
-
-Start:
-- Apache
-- MySQL
-
-### 3. Create the database
-
-Open:
-
-```text
-http://localhost/phpmyadmin
-```
-
-Create a database named:
-
-```text
-rest_foodv3
-```
-
-Then import:
-
-```text
-database/schema.sql
-```
-
-### 4. Configure environment variables
-
-Copy:
-
-```text
-.env.example
-```
-
-to:
-
-```text
-.env
-```
-
-Example configuration:
-
-```env
-APP_NAME=SHU Food
-APP_URL=http://localhost/rest_food_v3/
-APP_ENV=local
-
-DB_HOST=localhost
-DB_PORT=3306
-DB_NAME=rest_foodv3
-DB_USER=root
-DB_PASSWORD=
-
-BKASH_NUMBER=01XXXXXXXXX
-NAGAD_NUMBER=01XXXXXXXXX
-
-SSLCOMMERZ_ENABLED=false
-SSLCOMMERZ_SANDBOX=true
-SSLCOMMERZ_STORE_ID=
-SSLCOMMERZ_STORE_PASSWORD=
-```
-
-> Never commit your real `.env` file or live payment credentials.
-
-### 5. Run the application
-
-Customer website:
-
-```text
-http://localhost/rest_food_v3/
-```
-
-Admin panel:
-
-```text
-http://localhost/rest_food_v3/admin/login.php
-```
-
----
-
-## 🔑 Default Local Admin
-
-For the seeded local development database:
-
-```text
-Username: admin
-Password: Admin@123
-```
-
-> Change the default password before using the project outside local development.
-
----
-
-## 💳 Payment Configuration
+## Payment configuration
 
 ### Cash on Delivery
-Works without additional configuration.
 
-### bKash / Nagad
-Set your merchant numbers in `.env`:
+Works immediately.
 
-```env
+### bKash / Nagad manual verification
+
+These options stay hidden until a valid merchant number is configured in `.env`:
+
+```
 BKASH_NUMBER=01XXXXXXXXX
 NAGAD_NUMBER=01XXXXXXXXX
 ```
 
-The project supports a manual transaction-reference verification workflow.
+Replace the placeholders with your own merchant numbers. The customer submits sender phone + transaction ID. The payment is stored as `Submitted`; an administrator must verify it before changing it to `Paid`.
 
-### SSLCommerz
-To enable SSLCommerz:
+### SSLCOMMERZ hosted online payment
 
-```env
+The project includes an optional hosted-gateway integration and validation callback. It is disabled by default. Configure:
+
+```
 SSLCOMMERZ_ENABLED=true
 SSLCOMMERZ_SANDBOX=true
 SSLCOMMERZ_STORE_ID=your_store_id
 SSLCOMMERZ_STORE_PASSWORD=your_store_password
 ```
 
-Use your own sandbox or production credentials.
+For real gateway callbacks/IPN, `APP_URL` must point to a publicly reachable web server. A localhost URL cannot receive external gateway callbacks. Test in sandbox before production.
 
----
+## Coupon samples
 
-## 📸 Screenshots
+Fresh database installs include:
 
-Add screenshots to:
+- `WELCOME10`
+- `SAVE50`
 
-```text
-docs/screenshots/
-```
+They can be edited/disabled from Admin → Coupons.
 
-Recommended screenshots:
-- Homepage
-- Food menu
-- Food details
-- Cart
-- Checkout
-- Customer profile
-- Order history
-- Admin dashboard
-- Food management
-- Order management
+## Important database note
 
-Example:
+`database/schema.sql` is a fresh-install schema and recreates the project tables. Back up an existing production database before importing it. For this upgraded student/portfolio version, a fresh `rest_foodv3` database is recommended.
 
-```md
-![Homepage](docs/screenshots/homepage.png)
-```
+## Project structure
 
----
+- `app/` — shared helper/security/payment functions
+- `config/` — environment and PDO connection
+- `database/` — complete SQL schema + seed data
+- `partials-font/` — customer layout
+- `admin/` — admin dashboard and management pages
+- `css/v3.css` — customer design system
+- `css/admin-v3.css` — admin design
+- `assets/js/app.js` — navigation/payment UI interactions
+- `images/` — project and uploaded images
 
-## 🧪 Suggested Test Flow
+## Production checklist
 
-1. Register a customer account
-2. Login
-3. Add foods to cart
-4. Update quantity
-5. Apply a coupon
-6. Complete checkout
-7. View order history
-8. Open invoice
-9. Update profile
-10. Add a wishlist item
-11. Login as admin
-12. Update the order status
-13. Verify payment where applicable
-
----
-
-## 🔒 Git Ignore
-
-The project intentionally excludes local secrets and user-uploaded profile images:
-
-```gitignore
-.env
-
-# User uploaded profile images
-/images/users/*
-!/images/users/default_profile.webp
-
-# OS files
-Thumbs.db
-.DS_Store
-
-# Log files
-*.log
-
-# VS Code local settings
-.vscode/
-```
-
-`.env.example` remains in the repository so other developers can configure the application safely.
-
----
-
-## 📌 Notes
-
-- GitHub Pages cannot run this application because it requires PHP and MySQL.
-- Run it locally through XAMPP or deploy it to a PHP/MySQL-compatible hosting service.
-- Do not commit real API keys, merchant secrets, database passwords, or production credentials.
-
----
-
-## 👨‍💻 Author
-
-**woazkuruni**
-
-GitHub: [github.com/woazkuruni](https://github.com/woazkuruni)
-
----
-
-## 📄 License
-
-No license has been added yet. If you want others to reuse or modify the project, consider adding an appropriate open-source license.
+Before public deployment: set `APP_ENV=production`, use HTTPS, use a strong database password, change the default admin password, configure real merchant numbers/credentials, restrict upload directory execution at web-server level, and keep `.env` out of version control.
